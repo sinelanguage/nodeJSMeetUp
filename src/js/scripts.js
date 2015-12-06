@@ -3,29 +3,14 @@
 	'use strict';
 
 	$( function () {
-		// FireShell
 
-		var lieArr = [
-                        'I didn\'t want to hurt her',
-                        'I didn\'t want them to know how I really feel',
-                        'I\'m a corward',
-                        'I\'m in denial of how addicted I am',
-                        'I\'m scared',
-                        'I really don\'t like you',
-                        'They will think I\'m stupid',
-                        'I don\'t want be seen as weak'
-                ];
+		// demo
 
-		var el = document.getElementsByClassName( 'reason' );
-		// el[ 0 ].innerText = lieArr[ 0 ];
+		var el = document.getElementsByClassName( 'myClassName' );
 
 		function addClass( el, className ) {
 
 			el[ 0 ].classList.add( className );
-			setTimeout( function () {
-				//el[ 0 ].innerText = '-';
-				removeClass( el, className );
-			}, 2000 )
 
 		};
 
@@ -35,124 +20,112 @@
 
 		};
 
-		// setTimeout( function(){ addClass( el, 'fade-out' ) }, 5000 );
+		/*
 
-		function runThruLies() {
+		This presentation makes the following assumptions:
+		Developers are at least familliar with:
 
-			var el = document.getElementsByClassName( 'reason' );
+		the concept and useage of
 
-			for ( var i = 0; i < lieArr.length; i++ ) {
+		a) higher-order functions
+		b) closures
+		c) callbacks (continuation-passing style)
 
-				el[ 0 ].innerText = lieArr[ i ];
+		All terminology is assumed to be in the context of JavaScript and/or NodeJS.
 
-				setTimeout( function () {
-						addClass( 'reason', 'fade-out' )
-					},
-					5000 );
-				setTimeout( function () {
-						el[ 0 ].innerText = lieArr[ i + 1 ];
-					},
-					7000 );
+		Q: What is a promise?
+		A: Promises are representations of eventual values.  Not the value's themselves.
 
-				setTimeout( function () {
-						addClass( 'reason', 'fade-out' )
-					},
-					17000 );
-				// setTimeout( function(){ addClass( 'reason', 'fade-out' ) }, 5000 );
+		Q: Why promise's exist in modern JavaScript
+		A: They are there to help manage complexity in the order of execution of our functions in our apps.
 
-			}
+		Further thought:
+		If we don’t have any order at all, how can we compose values coming from other expressions? Well, we can’t, since there’s no guarantee that the value would have been computed by the time we need it.
 
-		};
+		One way to do this is by introducing this concept of dependencies on top of promises.
 
-		// runThruLies();
+		This new formulation of promises consists of two major components: Something that makes representations of values, and can put values in this representation. And something that creates a dependency between one expression and a value, creating a new promise for the result of the expression.
 
 
-		function makePolygraph() {
+		Q: How are promises represented in code?  (Is it a design pattern? A small library?  A Node Package?)
+		A:
 
-			var n = 40,
-				random = d3.random.normal( 0, .3 ),
-				data = d3.range( n ).map( random );
+		Q: How do promises help you in your NodeJS Apps?
+		A:
 
-			var margin = {
-					top: 20,
-					right: 20,
-					bottom: 20,
-					left: 40
+		*/
+
+		var promisesPresObj = {
+
+			sayHello: function(){
+
+				console.log("hello NodeJS meetup")
+
+			},
+
+			// Functions used to create a promise:
+
+			// Constructs a representation of a value. The value must be provided at later point in time
+			createPromise: function(){
+
+				return {
+					// A promise starts containing no value,
+					value: null,
+					// with a "pending" state, so it can be fulfilled later,
+					state: "pending",
+					// and it has no dependencies yet.
+					dependencies: []
+				};
+
+			},
+
+			//  puts a value in the promise, allowing the expressions that depend on the value to be computed.
+			fulfil: function(promise, value){
+
+				// We need to return a promise that will contain the value of
+				// the expression, when we're able to compute the expression
+				var result = this.createPromise();
+
+				// If we can't execute the expression yet, put it in the list of
+				// dependencies for the future value
+				if (promise.state === "pending") {
+					promise.dependencies.push(function(value) {
+						// We're interested in the eventual value of the expression
+						// so we can put that value in our result promise.
+						depend(expression(value), function(newValue) {
+							fulfil(result, newValue);
+							// We return an empty promise because `depend` requires one promise
+							return createPromise();
+						})
+					});
+
+					// Otherwise just execute the expression, we've got the value
+					// to plug in ready!
+				} else {
+					depend(expression(promise.value), function(newValue) {
+						fulfil(result, newValue);
+						// We return an empty promise because `depend` requires one promise
+						return createPromise();
+					})
+
 				},
-				// width = 960 - margin.left - margin.right,
-				// height = 500 - margin.top - margin.bottom;
-				width = window.innerWidth,
-				height = window.innerHeight;
 
-			var x = d3.scale.linear()
-				.domain( [ 0, n - 1 ] )
-				.range( [ 0, width ] );
+				// defines a dependency between the expression and the value of the promise. It returns a new promise for the result of the expression, so new expressions can depend on that value.
+				depend: function(promise, expression){
 
-			var y = d3.scale.linear()
-				.domain( [ -0.75, 0.75 ] )
-				.range( [ height, 0 ] );
+				}
 
-			var line = d3.svg.line()
-				.x( function ( d, i ) {
-					return x( i );
-				} )
-				.y( function ( d, i ) {
-					return y( d );
-				} );
+			};
 
-			var svg = d3.select( "body" ).append( "svg" )
-				.attr( "width", width + margin.left + margin.right )
-				.attr( "height", height + margin.top + margin.bottom )
-				.append( "g" )
-				.attr( "transform", "translate(" + margin.left + "," + margin.top + ")" );
+			/*
 
-			svg.append( "defs" ).append( "clipPath" )
-				.attr( "id", "clip" )
-				.append( "rect" )
-				.attr( "width", width )
-				.attr( "height", height );
+			There’s one open question left to be answered: how do we actually run the code so the order follows from the dependencies we’ve described? If we’re not following JavaScript’s execution order, something else has to provide the execution order we want.
 
-			svg.append( "g" )
-				.attr( "class", "x axis" )
-				.attr( "transform", "translate(0," + y( 0 ) + ")" )
+			*/
 
-			svg.append( "g" )
-				.attr( "class", "y axis" )
-
-			var path = svg.append( "g" )
-				.attr( "clip-path", "url(#clip)" )
-				.append( "path" )
-				.datum( data )
-				.attr( "class", "line" )
-				.attr( "d", line );
-
-			tick();
-
-			function tick() {
-
-				// push a new data point onto the back
-				data.push( random() );
-
-				// redraw the line, and slide it to the left
-				path
-					.attr( "d", line )
-					.attr( "transform", null )
-					.transition()
-					.duration( 2000 )
-					.ease( "linear" )
-					.attr( "transform", "translate(" + x( -1 ) + ",0)" )
-					.each( "end", tick );
-
-				// pop the old data point off the front
-				data.shift();
-
-			}
+			promisesPresObj.sayHello()
 
 
-		};
+		} );
 
-		makePolygraph();
-
-	} );
-
-} )( jQuery, window, document );
+	} )( jQuery, window, document );
