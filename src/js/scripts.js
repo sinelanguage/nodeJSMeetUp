@@ -1,3 +1,5 @@
+
+
 ( function ( $, window, document, undefined ) {
 
 	'use strict';
@@ -36,6 +38,10 @@
 		Q: What is a promise?
 		A: Promises are representations of eventual values.  Not the value's themselves.
 
+		A promise represents the eventual result of an asynchronous operation. The primary way of interacting with a promise is through its then method, which registers callbacks to receive either a promise’s eventual value or the reason why the promise cannot be fulfilled.
+
+		It is a placeholder into which the successful resulting value or reason for failure will materialize.
+
 		Q: Why promise's exist in modern JavaScript
 		A: They are there to help manage complexity in the order of execution of our functions in our apps.
 
@@ -53,79 +59,135 @@
 		Q: How do promises help you in your NodeJS Apps?
 		A:
 
+
+		Library (minified)  | Size*  | Implementation | Native | Client        | Server
+		---------------------------------------------------------------------------------
+		native (ES6)        | 0      | Promises/A+    | Yes    | Yes           | Yes
+		Q                   | 2.5    | Promises/A+    | No     | Yes           | Yes
+		Bluebird            | 68.4   | Promises/A+    | No     | Bfy/global   | CommonJS
+		when                | ?      | Promises/A+    | No     | Yes           | CommonJS
+		then/promise*       | 4.8    | Promises/A+    | No     | Browserify    | Yes
+
 		*/
 
-		var promisesPresObj = {
+		function sayHello(){
 
-			sayHello: function(){
+			console.log("Hello NodeJSMeetUp")
 
-				console.log("hello NodeJS meetup")
+		};
 
-			},
+		/*
 
-			// Functions used to create a promise:
+		Basic Promise Usage
+		The new Promise() constructor should only be used for legacy async tasks, like usage of setTimeout or XMLHttpRequest. A new Promise is created with the new keyword and the promise provides resolve and reject functions to the provided callback:
 
-			// Constructs a representation of a value. The value must be provided at later point in time
-			createPromise: function(){
+		*/
 
-				return {
-					// A promise starts containing no value,
-					value: null,
-					// with a "pending" state, so it can be fulfilled later,
-					state: "pending",
-					// and it has no dependencies yet.
-					dependencies: []
-				};
+		var myFirstPromise = new Promise( function(resolve, reject) {
 
-			},
+			// Do an assync task async task and then...
 
-			//  puts a value in the promise, allowing the expressions that depend on the value to be computed.
-			fulfil: function(promise, value){
+			if(/* good condition */) {
+				resolve('Success!');
+			}
+			else {
+				reject('Failure!');
+			}
+		} );
 
-				// We need to return a promise that will contain the value of
-				// the expression, when we're able to compute the expression
-				var result = this.createPromise();
+		myFirstPromise.then(function() {
+			/* do something with the result */
+		}).catch(function() {
+			/* error :( */
+		})
 
-				// If we can't execute the expression yet, put it in the list of
-				// dependencies for the future value
-				if (promise.state === "pending") {
-					promise.dependencies.push(function(value) {
-						// We're interested in the eventual value of the expression
-						// so we can put that value in our result promise.
-						depend(expression(value), function(newValue) {
-							fulfil(result, newValue);
-							// We return an empty promise because `depend` requires one promise
-							return createPromise();
-						})
-					});
+		// Callback Hell
 
-					// Otherwise just execute the expression, we've got the value
-					// to plug in ready!
-				} else {
-					depend(expression(promise.value), function(newValue) {
-						fulfil(result, newValue);
-						// We return an empty promise because `depend` requires one promise
-						return createPromise();
-					})
+		function asyncTask(fn) {
 
-				},
-
-				// defines a dependency between the expression and the value of the promise. It returns a new promise for the result of the expression, so new expressions can depend on that value.
-				depend: function(promise, expression){
-
-				}
-
-			};
 
 			/*
 
-			There’s one open question left to be answered: how do we actually run the code so the order follows from the dependencies we’ve described? If we’re not following JavaScript’s execution order, something else has to provide the execution order we want.
+			takes in a function as the parameter
+			waits 2 seconds, and invokes that function it took in
 
 			*/
 
-			promisesPresObj.sayHello()
+			return setTimeout( function(){ fn(); }, 2000 );
+
+		}
+
+		function foo(n, fn) {
+
+			/*
+
+			n: value that this fn will pass into the async function it contains.
+			fn: a function that the async function will invoke passing in the value the parent function took in
+
+			*/
 
 
-		} );
+			asyncTask( function(val){ fn(n); });
 
-	} )( jQuery, window, document );
+
+		}
+		function bar(n, fn) {
+
+			asyncTask(function(val){ fn(n); });
+
+		}
+		function baz(n, fn) {
+
+			asyncTask(function(val){ fn(n); });
+
+		}
+
+		// define n
+		var n = 1;
+
+		foo(n, function(res) { // foo takes in n=1 and this anonymous function that it will pass into async, which makes us wait 2 seconds before moving onto the next nested step
+
+			bar(res+1, function(res) { // bar takes in n=1 + 1, so now  2, and this anonymous function that it will pass into async, which makes us wait an additional 2 seconds before doing anything else
+
+				baz(res+1, function(res) {
+
+					// bar takes in n=1 + 1, so 2, and this anonymous function that it will pass into async, which makes us wait an additional 2 seconds and then calls this anonymous function which simply logs what was passed down the steps into it.
+					console.log("result =", res);
+
+				});
+
+			});
+
+		});
+
+		// 6 seconds pass...
+		// result = 3
+
+		// Continuation-passing style
+
+		function foo() { // foo simply calls the bar function, in which bar takes the anonymous function passed into it
+
+			bar(function (res) {
+				console.log("result = " + res);
+			});
+
+		};
+
+		function bar(fn) {  // bar passes the previously declared anonymous fn into baz, because bar is defined as a function that simply calls baz and passes its anonymous function parameter into it.
+
+			baz(fn);
+
+		};
+
+		function baz(fn) { // and baz calls that function that's been passed on sequentially
+
+			fn(3);
+		}
+
+		foo(); // and calling the originator of this whole scheme get's the ball rolling.
+
+
+
+	} );
+
+} )( jQuery, window, document );
