@@ -1,0 +1,119 @@
+/* FLEXBOX
+
+.container {
+
+display: flex | inline-flex
+flex-direction: row | row-reverse | column | column-reverse;
+flex-wrap: nowrap | wrap | wrap-reverse;
+flex-flow: <‘flex-direction’> || <‘flex-wrap’>
+justify-content: flex-start | flex-end | center | space-between | space-around;
+align-items: flex-start | flex-end | center | baseline | stretch;
+
+}
+
+.flex-container {
+
+* We first create a flex layout context *
+display: flex;
+
+* Then we define the flow direction and if we allow the items to wrap
+* Remember this is the same as:
+* flex-direction: row;
+* flex-wrap: wrap;
+
+flex-flow: row wrap;
+
+* Then we define how is distributed the remaining space *
+justify-content: space-around;
+
+
+.item {
+
+order: <integer>;
+flex-grow: <number>; default 0
+flex-shrink: <number>; default 1
+flex-basis: <length> | auto; default auto
+
+flex: none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]
+align-self: auto | flex-start | flex-end | center | baseline | stretch;
+
+
+}
+
+}
+
+*/
+//* {
+//        border: 1px solid white;
+//}
+// HOMEPAGE
+.container {
+        font-family: 'Open Sans', sans-serif;
+        &.container--lie {
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                // background-color: black;
+                .content {
+                        display: flex;
+                        flex-flow: column wrap;
+                        justify-content: center;
+                        height: 100%;
+                        padding: 6em;
+                        main {
+                                &.content__main {
+                                        display: flex;
+                                        flex-flow: column wrap;
+                                        justify-content: center;
+                                        align-items: center;
+                                        .reason {
+                                                font-size: 4em;
+                                                color: transparent;
+                                                text-shadow: 0 0 0 white;
+                                                animation: blurInText 2s linear;
+                                                opacity: 1.0;
+                                                font-weight: 100;
+                                                &.fade-out {
+                                                        text-shadow: 0 0 0 white;
+                                                        animation: blurOutText 2s linear;
+                                                        opacity: 0.0;
+                                                }
+                                        }
+                                }
+                        }
+                        nav {
+                                &.content__nav {
+                                        display: flex;
+                                        flex-flow: row wrap;
+                                        justify-content: center;
+                                        align-items: center;
+                                }
+                        }
+                }
+        }
+
+        // end HOMEPAGE
+        @keyframes blurInText {
+                from {
+                        opacity: 0.0;
+                        text-shadow: 0 0 50px white;
+                }
+                to {
+                        opacity: 1.0;
+                        text-shadow: 0 0 0 white;
+                }
+        }
+        @keyframes blurOutText {
+                from {
+                        opacity: 1.0;
+                        text-shadow: 0 0 0 white;
+                }
+                to {
+                        opacity: 0.0;
+                        text-shadow: 0 0 50px white;
+                }
+        }
+}

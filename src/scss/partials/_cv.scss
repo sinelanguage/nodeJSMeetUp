@@ -1,0 +1,200 @@
+// cv
+body {
+        margin: 0;
+        padding: 0;
+}
+
+.container {
+
+        &.container--cv {
+
+                display: block;
+                position: relative;
+                // top: 0;
+                // right: 0;
+                // bottom: 0;
+                // left: 0;
+                background-color: #0063ff;
+                background-image: linear-gradient(-180deg, #0063FF 1%, #FF00F4 94%);
+
+                .content {
+
+                        display: flex;
+                        flex-flow: column nowrap;
+                        justify-content: space-between;
+                        height: 100%;
+                        padding: 6em;
+
+                        &.content--collapsed {
+
+                                padding: 0.5em 6em 0em;
+
+                                header{
+
+                                        &.content__header {
+
+                                                display: flex;
+                                                flex-flow: row wrap;
+
+                                                .header--adam-logo {
+
+                                                        height: 58px;
+                                                        flex: 1
+
+                                                }
+                                                .header--adam-info {
+
+                                                        height: 58px;
+                                                        flex: 2;
+                                                        display: flex;
+                                                        flex-direction: row;
+                                                        align-items: center;
+
+                                                        .header--adam-name {
+
+                                                                flex:1;
+                                                                font-family: 'Roboto', sans-serif;
+                                                                font-weight: 500;
+                                                                font-size: 18px;
+                                                                letter-spacing: 2.99px;
+                                                                line-height: 21px;
+                                                                text-transform: uppercase;
+                                                                text-align: right;
+
+                                                                .grey { color: #C9C9C9;}
+
+                                                        }
+
+                                                        .header--adam-subtitle {
+
+                                                                font-family: 'Roboto', sans-serif;
+                                                                font-weight: 300;
+                                                                font-size: 18px;
+                                                                color: #FFFFFF;
+                                                                letter-spacing: 1.49px;
+                                                                line-height: 21px;
+                                                                 margin-left: 3em;
+
+                                                        }
+
+                                                }
+
+                                        }
+
+                                        &.content__header--collapsed {
+
+                                                display: flex;
+                                                flex-flow: row wrap;
+
+                                                margin:  2.5em 0 3em;
+
+                                                .header--adam-logo {
+
+                                                        height: 38px;
+                                                        flex: 1;
+
+                                                        img.header--svg-logo {
+                                                                width: 135px;
+                                                        }
+                                                }
+                                                .header--adam-info {
+
+                                                        height: 38px;
+                                                        flex: 2;
+                                                        display: flex;
+                                                        flex-direction: row;
+                                                        align-items: center;
+
+                                                        .header--adam-name {
+
+                                                                flex:1;
+                                                                font-family: 'Roboto', sans-serif;
+                                                                font-weight: 500;
+                                                                font-size: 14px;
+                                                                letter-spacing: 2.99px;
+                                                                line-height: 21px;
+                                                                text-transform: uppercase;
+                                                                text-align: right;
+
+                                                                .grey { color: #C9C9C9;}
+
+                                                        }
+
+                                                        .header--adam-subtitle {
+
+                                                                font-family: 'Roboto', sans-serif;
+                                                                font-weight: 300;
+                                                                font-size: 14px;
+                                                                color: #FFFFFF;
+                                                                letter-spacing: 1.49px;
+                                                                line-height: 21px;
+                                                                 margin-left: 3em;
+
+                                                        }
+
+                                                }
+
+                                        }
+
+                                }
+
+                                main {
+
+                                        &.content__main {
+
+                                                display: flex;
+                                                flex-flow: row wrap;
+
+                                                &.content__main--cv {
+
+                                                        background-color: white;
+                                                        padding: 6.0em;
+                                                        font-family: 'Roboto', sans-serif;
+                                                        font-weight: 400;
+                                                        font-size: 14px;
+                                                        color: #212121;
+                                                        letter-spacing: 0.43px;
+                                                        line-height: 28px;
+                                                        margin-bottom: 6em;
+                                                        @include shadow(5);
+
+                                                        h1,h2,h3,h4,h5,h6 {
+                                                                width: 100%;
+                                                        }
+
+                                                        h2 {
+                                                                font-weight: 400;
+                                                                font-size: 1.15em;
+                                                                line-height: 1.35;
+                                                                margin-bottom: 0.5em;
+                                                                text-transform: uppercase;
+                                                        }
+
+                                                        ul {
+                                                                margin-bottom: 3em;
+                                                        }
+
+                                                        .main--adam-description {
+
+                                                                font-family: 'Roboto', sans-serif;
+                                                                font-weight: 300;
+                                                                font-size: 14px;
+                                                                color: #212121;
+                                                                letter-spacing: 0.43px;
+                                                                line-height: 28px;
+
+                                                        }
+
+                                                }
+
+                                        }
+
+                                }
+
+                        }
+
+                }
+
+        }
+
+}
