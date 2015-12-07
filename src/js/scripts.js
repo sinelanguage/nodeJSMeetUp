@@ -8,20 +8,6 @@
 
 		// demo
 
-		var el = document.getElementsByClassName( 'myClassName' );
-
-		function addClass( el, className ) {
-
-			el[ 0 ].classList.add( className );
-
-		};
-
-		function removeClass( el, className ) {
-
-			el[ 0 ].classList.remove( className )
-
-		};
-
 		/*
 
 		This presentation makes the following assumptions:
@@ -38,53 +24,213 @@
 		Q: What is a promise?
 
 		A:
-		Promises are a programming concept
+
+		Promises are a programming concept.
 
 		A promise represents the eventual result of an asynchronous operation. The primary way of interacting with a promise is through its then method, which registers callbacks to receive either a promise’s eventual value or the reason why the promise cannot be fulfilled.
 
-		In JavaScript they are a specification (a set of guidelines your code should to follow when using/implimenting the concept)
+		In JavaScript there is a Promise Specification a specification (a set of guidelines your code should to follow when using/implimenting the concept)
 
 		In code, they exist and are used in a few ways.
 
 		1) Promise API in ES6
 		2) Promise Libraires such as (Q) and Bluebird
 
-		In these implimentations, at their core they give developers a “promise” as an object or function with a then method whose behavior conforms to this specification
+		In these implimentations, at their core they give developers use of a “promise” object or function with a then method whose behavior conforms to the Promise Specification
 
-		This object can be thought of as a placeholder into which the successful resulting value or reason for failure will materialize.
+		In NodeJS Promises are objects that have a then method. Unlike node functions, which take a single callback, the then method of a promise can take two callbacks: a success callback and an error callback.
+
+		This promise object can be thought of as a placeholder into which the successful resulting value or reason for failure will materialize.
+
+		Then what?
+
+		Functions can now return a value, called a 'promise', which is the object that represents the eventual results of that operation.
+
+		Different Promise Based Libraries
+
+		Library (minified)  | Size*  | Implementation | Native | Client        | Server
+		---------------------------------------------------------------------------------
+		native (ES6)        | 0      | Promises/A+    | Yes    | Yes           | Yes
+		Q                   | 2.5    | Promises/A+    | No     | Yes           | Yes
+		Bluebird            | 68.4   | Promises/A+    | No     | Bfy/global   | CommonJS
+		when                | ?      | Promises/A+    | No     | Yes           | CommonJS
+		then/promise*       | 4.8    | Promises/A+    | No     | Browserify    | Yes
 
 
-
+		I've been told Bluebird is faster than even the native ES6 Promise spec.  Angular has adopted the Q Library.  Node has several ways to deal with asynchronous operations, Promises are just one solution.  We have streams, generators, and several modules such as "async" which do things slightly different
 
 
 		Q: Why promise's exist in modern JavaScript
+
 		A:
 
 		They are there to help manage complexity in the order of execution of our functions in our apps.
 
 		If we don’t have any order at all, how can we compose values coming from other expressions? Well, we can’t, since there’s no guarantee that the value would have been computed by the time we need it.
 
-		Q: How can promises be used in NodeJS ?  ( Is it a design pattern? A small library? A Node Package ? )
+		Q: How can promises be used in NodeJS ?
 		A:
 
 		*/
 
+		// Basic Callback FN:
 
-		fs.readFile(path, function(error, content) {
+		getTweetsFor("domenic", function (err, results) {
+			// the rest of your code goes here.
+		});
 
-			// handle error or do something with content
-			if (error){
+		// Basic Promise:
+		// again your functions return a value, called a promise, which represents the eventual results of that operation.
 
-				// handleError
+		var promiseForTweets = getTweetsFor("domenic");
 
-			} else {
-
-				//handleContent
-
-			}
+		getTweetsFor("domenic") // promise-returning function
+		.then(function (tweets) {
+			var shortUrls = parseTweetsForUrls(tweets);
+			var mostRecentShortUrl = shortUrls[0];
+			return expandUrlUsingTwitterApi(mostRecentShortUrl); // promise-returning function
 		})
+		.then(httpGet) // promise-returning function
+		.then(
+			function (responseBody) {
+				console.log("Most recent link text:", responseBody);
+			},
+			function (error) {
+				console.error("Error with the twitterverse:", error);
+			}
+		);
+
+		/*
+
+		Syncronous Functions serve
+		They return values
+		They throw exceptions
+
+		Now, in an asynchronous world, you can no longer return values: they simply aren’t ready in time. Similarly, you can’t throw exceptions, because nobody’s there to catch them. So we descend into the so-called “callback hell,” where composition of return values involves nested callbacks, and composition of errors involves passing them up the chain manually
+
+		The point of promises is to give us back functional composition and error bubbling in the async world. They do this by saying that your functions should return a promise, which can do one of two things:
+
+		Become fulfilled by a value
+		Become rejected with an exception
+
+		'then' is not a mechanism for attaching callbacks to an aggregate collection. It’s a mechanism for applying a transformation to a promise, and yielding a new promise from that transformation.
+
+		*/
+
+		// Now, in an asynchronous world, you can no longer return values: they simply aren’t ready in time
+
+		// Basic Callback Hell:
+
+		step1(function (value1) {
+			step2(value1, function(value2) {
+				step3(value2, function(value3) {
+					step4(value3, function(value4) {
+						// Do something with value4
+					});
+				});
+			});
+		});
+
+
+		MyPromiseSpecBasedFn(promisedStep1)
+		.then(promisedStep2)
+		.then(promisedStep3)
+		.then(promisedStep4)
+		.then(function (value4) {
+			// Do something with value4
+		})
+		.catch(function (error) {
+			// Handle any error from all above steps
+		})
+		.done();
+
+
+		// in NodeJS
+
+		fs.readFile(file, function(err, res) {
+			if (err) handleError();
+			doStuffWith(res);
+		});
+
+		// With bluebirds promisify method
+
+		fs.readFile(file).then(function(res) {
+			doStuffWith(res);
+		}, function(err) {
+			handleError();
+		});
+
+		/*
+
+		So far, this doesn't look that different from regular node callbacks - except that you use a second callback for the error (which isn't necessarily better). So when does it get better?
+
+		Its better because you can attach the callback later if you want. Remember, fs.readFile(file) returns a promise now, so you can put that in a var, or return it from a function:
+
+		*/
+
+		var filePromise = fs.readFile(file);
+		// do more stuff... even nest inside another promise, then
+		filePromise.then(function(res) { ... });
+
+		/*
+
+		Yup, the second callback is optional. We're going to see why later.
+
+		Okay, that's still not much of an improvement. How about this then? You can attach more than one callback to a promise if you like:
+
+
+		*/
+
+
+		filePromise.then(function(res) { uploadData(url, res); });
+		filePromise.then(function(res) { saveLocal(url, res); });
+
+
+		/*
+
+		if you return something from inside a .then() callback, then you'll get a promise for that thing on the outside?
+		Say you want to get a line from a file. Well, you can get a promise for that line instead:
+
+		*/
+
+
+		var filePromise = fs.readFile(file)
+
+		var linePromise = filePromise.then(function(data) {
+			return data.toString().split('\n')[line];
+		});
+
+		var beginsWithHelloPromise = linePromise.then(function(line) {
+			return /^hello/.test(line);
+		});
+
+		// this
+		fs.readFile("file.json", function (err, val) {
+			if (err) {
+				console.error("unable to read file");
+			}
+			else {
+				try {
+					val = JSON.parse(val);
+					console.log(val.success);
+				}
+				catch (e) {
+					console.error("invalid json in file");
+				}
+			}
+		});
 
 		// becomes this:
+
+		fs.readFileAsync("file.json").then(JSON.parse).then(function (val) {
+			console.log(val.success);
+		})
+		.catch(SyntaxError, function (e) {
+			console.error("invalid json in file");
+		})
+		.catch(function (e) {
+			console.error("unable to read file");
+		});
 
 		fs.readFileAsync(path).done(function(content) {
 
@@ -110,12 +256,12 @@
 
 		// Callback based FN
 		function readMyFile(callback) {
-		    fs.readFile('myfile.txt', callback);
+			fs.readFile('myfile.txt', callback);
 		}
 
 		// Promise based FN
 		function readMyFile() {
-		    return fs.readFileAsync('myfile.txt');
+			return fs.readFileAsync('myfile.txt');
 		}
 
 		// what if you need to do more processing with the result?  Use a "then" method.
@@ -133,28 +279,17 @@
 		*/
 
 		function readLine(file, line, callback) {
-		    fs.readFile(file, function process(err, content) {
-		        if (err) return callback(err);
-		        callback(null, content.toString().split('\n')[line]);
-		    });
+			fs.readFile(file, function process(err, content) {
+				if (err) return callback(err);
+				callback(null, content.toString().split('\n')[line]);
+			});
 		}
 		readLine('myfile.txt', 2, function(err, line) {
-		    // handle error or use line
+			// handle error or use line
 		});
 
 
-		Promise Based
 
-		/*
-		Library (minified)  | Size*  | Implementation | Native | Client        | Server
-		---------------------------------------------------------------------------------
-		native (ES6)        | 0      | Promises/A+    | Yes    | Yes           | Yes
-		Q                   | 2.5    | Promises/A+    | No     | Yes           | Yes
-		Bluebird            | 68.4   | Promises/A+    | No     | Bfy/global   | CommonJS
-		when                | ?      | Promises/A+    | No     | Yes           | CommonJS
-		then/promise*       | 4.8    | Promises/A+    | No     | Browserify    | Yes
-
-		*/
 
 		function sayHello(){
 
@@ -271,6 +406,107 @@
 	}
 
 	foo2(); // and calling the originator of this whole scheme get's the ball rolling.
+
+	// Examples of Promises/A forwarding.
+
+	// A few simple examples to show how the mechanics of Promises/A
+	// forwarding works.
+	// These examples are contrived, of course, and in real usage, promise
+	// chains will typically be spread across several function calls, or
+	// even several levels of your application architecture.
+
+	var d;
+
+	d = when.defer();
+
+	// Resolved promises chain and forward values to next promise
+	// The first promise, d.promise, will resolve with the value passed
+	// to d.resolve() below.
+	// Each call to .then() returns a new promise that will resolve
+	// with the return value of the previous handler.  This creates a
+	// promise "pipeline".
+	d.promise
+	.then(function(x) {
+		// x will be the value passed to d.resolve() below
+		// and returns a *new promise* for x + 1
+		return x + 1;
+	})
+	.then(function(x) {
+		// x === 2
+		// This handler receives the return value of the
+		// previous handler.
+		return x + 1;
+	})
+	.then(function(x) {
+		// x === 3
+		// This handler receives the return value of the
+		// previous handler.
+		return x + 1;
+	})
+	.then(function(x) {
+		// x === 4
+		// This handler receives the return value of the
+		// previous handler.
+		log('resolve ' + x);
+	});
+
+	d.resolve(1);
+
+	// Rejected promises behave similarly, and also work similarly
+	// to try/catch:
+	// When you catch an exception, you must rethrow for it to propagate.
+	// Similarly, when you handle a rejected promise, to propagate the
+	// rejection, "rethrow" it by either returning a rejected promise,
+	// or actually throwing (since when.js translates thrown exceptions
+	// into rejections)
+	d = when.defer();
+
+	d.promise
+	.then(function(x) {
+		throw x + 1;
+	})
+	.then(null, function(x) {
+		// Propagate the rejection
+		throw x + 1;
+	})
+	.then(null, function(x) {
+		// Can also propagate by returning another rejection
+		return when.reject(x + 1);
+	})
+	.then(null, function(x) {
+		log('reject ' + x); // 4
+	});
+
+	d.resolve(1);
+
+	// Just like try/catch, you can choose to propagate or not.  Mixing
+	// resolutions and rejections will still forward handler results
+	// in a predictable way.
+	d = when.defer();
+
+	d.promise
+	.then(function(x) {
+		return x + 1;
+	})
+	.then(function(x) {
+		throw x + 1;
+	})
+	.then(null, function(x) {
+		// Handle the rejection, and don't propagate.  This is like
+		// catch without a rethrow
+		return x + 1;
+	})
+	.then(function(x) {
+		log('mixed ' + x); // 4
+	});
+
+	d.resolve(1);
+
+	function log(msg) {
+		var p = document.createElement('p');
+		p.innerHTML = msg;
+		document.body.appendChild(p);
+	}
 
 
 
