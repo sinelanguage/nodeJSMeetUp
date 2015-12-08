@@ -150,3 +150,33 @@ readFilePromise("mylittlepony.json")
 })
 
 console.log("DONE");
+
+
+
+
+
+
+
+/*
+Promise.all([
+
+        readFilePromise("nintendo.json"),
+        readFilePromise("piano.json"),
+        readFilePromise("barbie.json"),
+        readFilePromise("beats.json"),
+        readFilePromise("blocks.json"),
+        readFilePromise("books.json"),
+        readFilePromise("kitchen.json"),
+        readFilePromise("minions.json"),
+        readFilePromise("moreminions.json"),
+        readFilePromise("playdough.json"),
+        readFilePromise("teddy.json"),
+
+]).then(function(data){
+        console.log("This is everything: ", data)
+}).catch(function(e) {
+
+        console.log(e); // "oh, no!"
+
+})
+*/
