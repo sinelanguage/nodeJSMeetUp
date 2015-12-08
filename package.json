@@ -28,6 +28,10 @@
     "matchdep": "~0.1.2"
   },
   "scripts": {
-    "postinstall" : "node_modules/.bin/bower install"
+    "postinstall": "node_modules/.bin/bower install"
+  },
+  "dependencies": {
+    "es6-promise": "^3.0.2",
+    "request": "^2.67.0"
   }
 }
